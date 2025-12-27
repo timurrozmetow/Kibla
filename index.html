@@ -2,429 +2,791 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Кибла — направление на Каабу</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Кибла — точное направление на Каабу</title>
+  <meta name="theme-color" content="#0b0f14" />
   <style>
-    :root { color-scheme: light dark; }
-    body {
-      margin: 0;
+    :root{
+      --bg:#0b0f14;
+      --card:#101826;
+      --card2:#0e1522;
+      --text:#e8eef7;
+      --muted:#9bb0c6;
+      --line:rgba(255,255,255,.10);
+      --ok:#37d67a;
+      --warn:#ffbf3c;
+      --bad:#ff5d5d;
+      --accent:#53a7ff;
+      --shadow: 0 12px 35px rgba(0,0,0,.35);
+      color-scheme: dark;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      display: grid;
-      place-items: center;
-      min-height: 100vh;
+      background: radial-gradient(1200px 700px at 50% -10%, rgba(83,167,255,.20), transparent 55%),
+                  radial-gradient(900px 600px at 20% 110%, rgba(55,214,122,.14), transparent 60%),
+                  var(--bg);
+      color:var(--text);
+      min-height:100vh;
       padding: 16px;
+      display:grid;
+      place-items:center;
     }
-    .card {
-      width: min(520px, 100%);
-      border: 1px solid rgba(127,127,127,.35);
-      border-radius: 18px;
-      padding: 16px;
-      box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    .wrap{
+      width:min(640px,100%);
+      display:grid;
+      gap:12px;
     }
-    h1 { font-size: 18px; margin: 0 0 8px; }
-    .muted { opacity: .75; font-size: 13px; line-height: 1.35; }
-    .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
-    button, input {
-      border-radius: 12px;
-      border: 1px solid rgba(127,127,127,.35);
-      padding: 10px 12px;
-      font-size: 14px;
-      background: transparent;
-      color: inherit;
+    header{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:12px;
+      padding: 2px 2px 6px;
     }
-    button { cursor: pointer; }
-    button.primary { border-color: rgba(80,160,255,.7); }
-    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
-    .grid2 input { width: 100%; box-sizing: border-box; }
-    .dial {
-      margin: 18px auto 10px;
-      width: 260px;
-      height: 260px;
+    h1{
+      margin:0;
+      font-size:16px;
+      letter-spacing:.2px;
+      font-weight:650;
+    }
+    .sub{
+      margin:4px 0 0;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.35;
+    }
+    .chipRow{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;}
+    .chip{
+      font-size:12px;
+      padding:6px 10px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      background: rgba(255,255,255,.03);
+      color: var(--muted);
+      display:flex; align-items:center; gap:8px;
+      user-select:none;
+    }
+    .dot{width:8px;height:8px;border-radius:50%;}
+    .dot.ok{background:var(--ok)}
+    .dot.warn{background:var(--warn)}
+    .dot.bad{background:var(--bad)}
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:12px;
+    }
+    @media(min-width: 640px){
+      .grid{grid-template-columns: 1.05fr .95fr;}
+    }
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border:1px solid var(--line);
+      border-radius:18px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .pad{padding:14px;}
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+    button, input, select{
+      font: inherit;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      color: var(--text);
+      padding:10px 12px;
+      outline: none;
+    }
+    button{cursor:pointer}
+    button.primary{
+      border-color: rgba(83,167,255,.6);
+      background: linear-gradient(180deg, rgba(83,167,255,.18), rgba(83,167,255,.07));
+    }
+    button.ghost{
+      background: rgba(255,255,255,.02);
+    }
+    button:active{transform: translateY(1px)}
+    .muted{color:var(--muted)}
+    .small{font-size:12px; line-height:1.35}
+    .kv{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 0;
+      border-bottom:1px dashed rgba(255,255,255,.12);
+      font-size:14px;
+    }
+    .kv:last-child{border-bottom:0}
+    .kv b{font-weight:700}
+    .divider{
+      height:1px; background:var(--line);
+      margin: 10px -14px;
+    }
+
+    /* Compass */
+    .compassWrap{
+      display:grid;
+      place-items:center;
+      padding: 12px 12px 6px;
+    }
+    .compass{
+      width: 300px;
+      height: 300px;
       border-radius: 50%;
-      border: 1px solid rgba(127,127,127,.35);
+      border: 1px solid rgba(255,255,255,.14);
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,.05), rgba(255,255,255,.01) 60%, rgba(0,0,0,.15) 100%),
+        conic-gradient(from 0deg, rgba(83,167,255,.16), rgba(55,214,122,.10), rgba(255,191,60,.10), rgba(83,167,255,.16));
       position: relative;
-      display: grid;
-      place-items: center;
-      user-select: none;
-      touch-action: manipulation;
+      box-shadow: 0 18px 60px rgba(0,0,0,.35);
+      overflow:hidden;
     }
-    .n {
-      position: absolute; top: 10px; left: 50%;
+    @media(max-width: 360px){
+      .compass{width: 270px;height:270px;}
+    }
+    .ring{
+      position:absolute; inset:10px;
+      border-radius:50%;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      display:grid; place-items:center;
+    }
+    .ticks{
+      position:absolute; inset:0;
+      opacity:.7;
+      pointer-events:none;
+    }
+    .label{
+      position:absolute; left:50%; top:10px;
       transform: translateX(-50%);
-      font-weight: 700; font-size: 14px;
-      opacity: .85;
+      font-weight:800;
+      letter-spacing:.6px;
+      opacity:.95;
     }
-    .arrowWrap {
-      width: 180px; height: 180px;
-      display: grid; place-items: center;
+    .label.s{top:auto; bottom:10px;}
+    .label.e{top:50%; left:auto; right:10px; transform: translateY(-50%);}
+    .label.w{top:50%; left:10px; transform: translateY(-50%);}
+
+    .needleLayer{
+      position:absolute; inset:0;
+      display:grid; place-items:center;
       transform: rotate(0deg);
       transition: transform .10s linear;
     }
-    .arrow {
-      width: 0; height: 0;
-      border-left: 16px solid transparent;
-      border-right: 16px solid transparent;
-      border-bottom: 70px solid currentColor;
-      filter: drop-shadow(0 6px 10px rgba(0,0,0,.15));
+    .needle{
+      width: 14px; height: 120px;
+      position: relative;
     }
-    .info {
-      margin-top: 10px;
-      display: grid;
-      gap: 6px;
-      font-size: 14px;
+    .needle:before{
+      content:"";
+      position:absolute; left:50%; top:0;
+      transform:translateX(-50%);
+      width:0;height:0;
+      border-left:14px solid transparent;
+      border-right:14px solid transparent;
+      border-bottom: 80px solid rgba(255,255,255,.92);
+      filter: drop-shadow(0 8px 14px rgba(0,0,0,.35));
     }
-    .kv {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      border-bottom: 1px dashed rgba(127,127,127,.25);
-      padding-bottom: 6px;
+    .needle:after{
+      content:"";
+      position:absolute; left:50%; bottom:0;
+      transform:translateX(-50%);
+      width:10px;height:10px;border-radius:50%;
+      background: rgba(255,255,255,.25);
+      border:1px solid rgba(255,255,255,.22);
+      box-shadow: 0 10px 25px rgba(0,0,0,.35);
     }
-    .kv b { font-weight: 650; }
-    .status {
-      margin-top: 10px;
-      font-size: 13px;
-      opacity: .85;
+
+    .kaabaBadge{
+      position:absolute;
+      top:12px; left:12px;
+      display:flex; align-items:center; gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.25);
+      font-size:12px;
+      color: var(--text);
+      backdrop-filter: blur(6px);
+    }
+    .kaabaIcon{
+      width:14px;height:14px;border-radius:3px;
+      background: linear-gradient(180deg,#d8b24a,#8b6d22);
+      position:relative;
+      box-shadow: 0 8px 18px rgba(0,0,0,.35);
+    }
+    .kaabaIcon:before{
+      content:"";
+      position:absolute; left:2px; right:2px; top:4px; height:3px;
+      background: rgba(0,0,0,.75);
+      border-radius:2px;
+    }
+
+    .hint{
+      padding: 0 14px 12px;
+      color: var(--muted);
+      font-size: 12px;
       line-height: 1.35;
     }
-    .tiny { font-size: 12px; opacity: .7; margin-top: 8px; }
-    .switchRow {
+    .warnBox{
       margin-top: 10px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 13px;
-      opacity: .9;
-    }
-    .switchRow input { transform: scale(1.1); }
-    .badge {
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,191,60,.35);
+      background: rgba(255,191,60,.08);
+      color: rgba(255,255,255,.9);
       font-size: 12px;
-      padding: 2px 8px;
-      border: 1px solid rgba(127,127,127,.35);
-      border-radius: 999px;
-      opacity: .9;
+      line-height: 1.35;
+      display:none;
     }
+    .manualBox{
+      display:none;
+      margin-top: 10px;
+      gap:10px;
+    }
+    .grid2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    .footer{
+      text-align:center;
+      color: var(--muted);
+      font-size: 12px;
+      padding: 4px 0 0;
+    }
+    a{color: var(--accent); text-decoration:none}
+    a:hover{text-decoration:underline}
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Направление на Каабу (Кибла)</h1>
-    <div class="muted">
-      Лёгкая версия без карт. Для точного “Авто” нужны GPS и компас.
-      На Android компас в браузере иногда “инвертирован” — для этого есть переключатель ниже.
-    </div>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Кибла</h1>
+        <div class="sub">Открой сайт по HTTPS → нажми “Старт”. Держи телефон ровно (горизонтально).</div>
+      </div>
+      <div class="chipRow">
+        <div class="chip"><span class="dot" id="gpsDot"></span><span id="gpsChip">GPS: —</span></div>
+        <div class="chip"><span class="dot" id="sensDot"></span><span id="sensChip">Сенсоры: —</span></div>
+        <div class="chip"><span class="dot" id="qualDot"></span><span id="qualChip">Качество: —</span></div>
+      </div>
+    </header>
 
-    <div class="dial" aria-label="Компас">
-      <div class="n">N</div>
-      <div id="arrowWrap" class="arrowWrap" title="Стрелка указывает на Киблу">
-        <div class="arrow"></div>
+    <div class="grid">
+      <div class="card">
+        <div class="compassWrap">
+          <div class="compass" id="compass">
+            <div class="kaabaBadge"><span class="kaabaIcon"></span>Кааба</div>
+
+            <!-- labels -->
+            <div class="label">N</div>
+            <div class="label s">S</div>
+            <div class="label e">E</div>
+            <div class="label w">W</div>
+
+            <!-- ticks -->
+            <svg class="ticks" viewBox="0 0 100 100" aria-hidden="true">
+              <g opacity="0.55">
+                <!-- 36 small ticks -->
+                <script type="application/ecmascript"><![CDATA[
+                  // (inline SVG script not executed in many CSP contexts; ticks drawn by CSS/JS below)
+                ]]></script>
+              </g>
+            </svg>
+
+            <div class="ring">
+              <div class="needleLayer" id="needleLayer">
+                <div class="needle"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="hint" id="status">Статус: готово.</div>
+      </div>
+
+      <div class="card">
+        <div class="pad">
+          <div class="row">
+            <button class="primary" id="btnStart">Старт (GPS + компас)</button>
+            <button class="ghost" id="btnStop">Стоп</button>
+            <button class="ghost" id="btnManual">Ручной режим</button>
+          </div>
+
+          <div class="warnBox" id="warnBox"></div>
+
+          <div class="manualBox" id="manualBox">
+            <div class="grid2">
+              <input id="lat" inputmode="decimal" placeholder="Широта (напр. 37.924785)" />
+              <input id="lon" inputmode="decimal" placeholder="Долгота (напр. 58.365557)" />
+            </div>
+            <div class="row">
+              <button class="primary" id="btnCalc">Посчитать</button>
+              <button class="ghost" id="btnUseGPS">Взять GPS</button>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="kv"><span class="muted">Азимут Киблы</span><b id="qiblaAz">—</b></div>
+          <div class="kv"><span class="muted">Курс телефона</span><b id="heading">—</b></div>
+          <div class="kv"><span class="muted">Поворот стрелки</span><b id="turn">—</b></div>
+          <div class="kv"><span class="muted">Координаты</span><b id="coords">—</b></div>
+          <div class="kv"><span class="muted">Точность GPS</span><b id="acc">—</b></div>
+
+          <div class="divider"></div>
+
+          <div class="small muted">
+            Если “прыгает”: убери магнитный чехол/держатель, отойди от металла/машины, сделай “восьмёрку” телефоном 5–10 сек.
+            <br/>Если датчики у телефона слабые/помехи сильные — используй ручной режим (координаты).
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="info">
-      <div class="kv"><span>Азимут Киблы</span><b id="qiblaAz">—</b></div>
-      <div class="kv"><span>Твой курс (компас)</span><b id="heading">—</b></div>
-      <div class="kv"><span>Поворот стрелки</span><b id="turn">—</b></div>
-      <div class="kv"><span>Координаты</span><b id="coords">—</b></div>
-      <div class="kv"><span>Точность GPS</span><b id="acc">—</b></div>
-    </div>
-
-    <div class="row">
-      <button class="primary" id="btnAuto">Авто: GPS + компас</button>
-      <button id="btnGPS">Только GPS (без компаса)</button>
-      <button id="btnStop">Стоп (отключить датчики)</button>
-    </div>
-
-    <div class="switchRow">
-      <label style="display:flex;align-items:center;gap:8px;">
-        <input type="checkbox" id="invert" />
-        Инвертировать компас (если показывает “в другую сторону”)
-      </label>
-      <span class="badge" id="compassBadge">компас: off</span>
-    </div>
-
-    <div class="row">
-      <button id="btnManual">Ручной ввод</button>
-    </div>
-
-    <div id="manualBox" style="display:none; margin-top:12px;">
-      <div class="grid2">
-        <input id="lat" inputmode="decimal" placeholder="Широта (например 37.9838)" />
-        <input id="lon" inputmode="decimal" placeholder="Долгота (например 23.7275)" />
-      </div>
-      <div class="row">
-        <button class="primary" id="btnCalc">Посчитать Киблу</button>
-        <button id="btnUseSaved">Подставить сохранённые</button>
-      </div>
-      <div class="tiny">
-        Координаты можно взять из Google Maps (долгое нажатие → копировать).
-      </div>
-    </div>
-
-    <div class="status" id="status">Статус: ждём действия.</div>
-    <div class="tiny">
-      Для точности: убери магнитный чехол/держатель, отойди от машины/металла, сделай “восьмёрку” телефоном 5–10 секунд.
+    <div class="footer">
+      Веб-версия не может получить доступ к датчикам так же полно, как нативные приложения. Но тут реализован максимально устойчивый режим для браузера.
     </div>
   </div>
 
 <script>
 (() => {
-  // Координаты Каабы
+  // =========================
+  // Core config (tuned for stability)
+  // =========================
   const KAABA = { lat: 21.422487, lon: 39.826206 };
 
+  // фильтрация/антишум:
+  const CFG = {
+    alpha: 0.08,          // сглаживание (меньше = стабильнее)
+    maxStepDeg: 10,       // ограничение "скорости" поворота за событие
+    rejectJumpDeg: 55,    // если скачок больше — игнор (помеха)
+    minEventMs: 40,       // игнор слишком частых событий
+    gpsTimeout: 15000,
+  };
+
+  // =========================
+  // DOM
+  // =========================
   const el = (id) => document.getElementById(id);
-  const arrowWrap = el('arrowWrap');
+
+  const needleLayer = el('needleLayer');
   const statusEl = el('status');
+  const warnBox = el('warnBox');
+  const manualBox = el('manualBox');
+
   const qiblaAzEl = el('qiblaAz');
   const headingEl = el('heading');
   const turnEl = el('turn');
   const coordsEl = el('coords');
   const accEl = el('acc');
-  const manualBox = el('manualBox');
-  const invertEl = el('invert');
-  const compassBadge = el('compassBadge');
 
+  const gpsDot = el('gpsDot');
+  const sensDot = el('sensDot');
+  const qualDot = el('qualDot');
+  const gpsChip = el('gpsChip');
+  const sensChip = el('sensChip');
+  const qualChip = el('qualChip');
+
+  // =========================
+  // State
+  // =========================
   let userLat = null, userLon = null, gpsAcc = null;
-  let headingDeg = null;   // 0..360 (0=N)
-  let qiblaAz = null;      // 0..360
-  let compassOn = false;
+  let qiblaAz = null;
+  let headingDeg = null;     // 0..360
+  let lastRaw = null;
+  let lastEventTs = 0;
 
-  // safe storage
-  const storage = {
-    get(key) {
-      try { return localStorage.getItem(key); } catch { return null; }
-    },
-    set(key, val) {
-      try { localStorage.setItem(key, val); } catch {}
-    }
-  };
+  let watchId = null;
 
-  // Helpers
+  // sensors mode
+  // "ABS_SENSOR" (AbsoluteOrientationSensor), "DEV_ORIENT" (DeviceOrientation), "NONE"
+  let sensorMode = "NONE";
+
+  // quality
+  // OK / WARN / BAD derived from GPS accuracy + stability
+  let quality = "WARN";
+
+  // =========================
+  // Utils
+  // =========================
   const toRad = (d) => d * Math.PI / 180;
   const toDeg = (r) => r * 180 / Math.PI;
   const norm360 = (d) => ((d % 360) + 360) % 360;
+  const shortestDelta = (from, to) => ((to - from + 540) % 360) - 180;
 
-  function setStatus(msg) { statusEl.textContent = 'Статус: ' + msg; }
+  function setStatus(msg) {
+    statusEl.textContent = "Статус: " + msg;
+  }
+
+  function showWarn(msg) {
+    warnBox.style.display = "block";
+    warnBox.textContent = msg;
+  }
+  function hideWarn() {
+    warnBox.style.display = "none";
+    warnBox.textContent = "";
+  }
+
+  function setDot(dotEl, level) {
+    dotEl.className = "dot " + (level === "OK" ? "ok" : level === "WARN" ? "warn" : "bad");
+  }
+
+  function updateChips() {
+    // GPS chip
+    if (userLat == null) {
+      gpsChip.textContent = "GPS: —";
+      setDot(gpsDot, "BAD");
+    } else {
+      const acc = (gpsAcc == null) ? "?" : Math.round(gpsAcc) + "м";
+      gpsChip.textContent = "GPS: " + acc;
+      setDot(gpsDot, gpsAcc != null && gpsAcc <= 25 ? "OK" : gpsAcc != null && gpsAcc <= 60 ? "WARN" : "BAD");
+    }
+
+    // Sensors chip
+    sensChip.textContent = "Сенсоры: " + (sensorMode === "ABS_SENSOR" ? "ABS" : sensorMode === "DEV_ORIENT" ? "ORIENT" : "—");
+    setDot(sensDot, sensorMode === "NONE" ? "BAD" : sensorMode === "DEV_ORIENT" ? "WARN" : "OK");
+
+    // Quality chip
+    qualChip.textContent = "Качество: " + (quality === "OK" ? "хорошее" : quality === "WARN" ? "среднее" : "плохое");
+    setDot(qualDot, quality);
+  }
 
   function getScreenAngle() {
     const so = window.screen?.orientation?.angle;
-    if (typeof so === 'number') return so;
+    if (typeof so === "number") return so;
     const wo = window.orientation;
-    if (typeof wo === 'number') return wo;
+    if (typeof wo === "number") return wo;
     return 0;
   }
 
-  // сглаживание по короткой дуге (устойчивее)
-  function smoothAngle(prev, next, alpha = 0.18) {
+  function smoothAngle(prev, next, alpha) {
     if (prev == null) return next;
-    let delta = ((next - prev + 540) % 360) - 180;
-    return norm360(prev + delta * alpha);
+    const d = shortestDelta(prev, next);
+    return norm360(prev + d * alpha);
+  }
+
+  function clampStep(prev, next, maxStep) {
+    if (prev == null) return next;
+    const d = shortestDelta(prev, next);
+    const clipped = Math.max(-maxStep, Math.min(maxStep, d));
+    return norm360(prev + clipped);
   }
 
   function calcQiblaAzimuth(lat, lon) {
     const φ1 = toRad(lat);
     const φ2 = toRad(KAABA.lat);
     const Δλ = toRad(KAABA.lon - lon);
-
     const y = Math.sin(Δλ) * Math.cos(φ2);
     const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
-    const θ = Math.atan2(y, x);
-    return norm360(toDeg(θ));
+    return norm360(toDeg(Math.atan2(y, x)));
   }
 
-  function updateUI() {
+  function render() {
+    // compute qibla
     if (userLat != null && userLon != null) {
-      coordsEl.textContent = `${userLat.toFixed(6)}, ${userLon.toFixed(6)}`;
       qiblaAz = calcQiblaAzimuth(userLat, userLon);
-      qiblaAzEl.textContent = `${qiblaAz.toFixed(1)}°`;
-      storage.set('qibla_lat', String(userLat));
-      storage.set('qibla_lon', String(userLon));
+      qiblaAzEl.textContent = qiblaAz.toFixed(1) + "°";
+      coordsEl.textContent = userLat.toFixed(6) + ", " + userLon.toFixed(6);
+      accEl.textContent = gpsAcc == null ? "—" : (Math.round(gpsAcc) + " м");
     } else {
-      coordsEl.textContent = '—';
-      qiblaAzEl.textContent = '—';
       qiblaAz = null;
+      qiblaAzEl.textContent = "—";
+      coordsEl.textContent = "—";
+      accEl.textContent = "—";
     }
 
-    accEl.textContent = (gpsAcc == null) ? '—' : `${Math.round(gpsAcc)} м`;
-
-    headingEl.textContent = (headingDeg == null) ? '—' : `${norm360(headingDeg).toFixed(1)}°`;
+    headingEl.textContent = headingDeg == null ? "—" : norm360(headingDeg).toFixed(1) + "°";
 
     if (qiblaAz != null) {
-      const rotateDeg = (headingDeg == null) ? qiblaAz : norm360(qiblaAz - headingDeg);
-      arrowWrap.style.transform = `rotate(${rotateDeg}deg)`;
-      turnEl.textContent = `${rotateDeg.toFixed(1)}°`;
+      const rotate = (headingDeg == null) ? qiblaAz : norm360(qiblaAz - headingDeg);
+      needleLayer.style.transform = `rotate(${rotate}deg)`;
+      turnEl.textContent = rotate.toFixed(1) + "°";
     } else {
-      arrowWrap.style.transform = 'rotate(0deg)';
-      turnEl.textContent = '—';
+      needleLayer.style.transform = `rotate(0deg)`;
+      turnEl.textContent = "—";
     }
 
-    compassBadge.textContent = 'компас: ' + (compassOn ? 'on' : 'off');
+    // update quality heuristics:
+    // BAD if no GPS or very bad accuracy or huge sensor jumps
+    if (userLat == null) quality = "BAD";
+    else if (gpsAcc != null && gpsAcc > 80) quality = "BAD";
+    else if (sensorMode === "NONE") quality = "WARN";
+    else if (gpsAcc != null && gpsAcc <= 25) quality = "OK";
+    else quality = "WARN";
+
+    updateChips();
   }
 
+  // =========================
   // GPS
-  function getGPS() {
-    return new Promise((resolve) => {
-      if (!navigator.geolocation) {
-        setStatus('геолокация недоступна в этом браузере.');
-        return resolve(false);
-      }
-      setStatus('запрашиваю GPS…');
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          userLat = pos.coords.latitude;
-          userLon = pos.coords.longitude;
-          gpsAcc = pos.coords.accuracy;
-          setStatus('GPS получен.');
-          updateUI();
-          resolve(true);
-        },
-        (err) => {
-          setStatus('ошибка GPS: ' + (err.message || err.code));
-          resolve(false);
-        },
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 2000 }
-      );
-    });
+  // =========================
+  function stopGPS() {
+    if (watchId != null) {
+      navigator.geolocation.clearWatch(watchId);
+      watchId = null;
+    }
   }
 
-  // Compass handlers
-  function onOrientationFixed(event) {
-    let hd = null;
-
-    // iOS Safari
-    if (typeof event.webkitCompassHeading === 'number') {
-      hd = event.webkitCompassHeading; // already 0..360, 0=N
-    }
-    // Android / Chrome
-    else if (typeof event.alpha === 'number') {
-      // default for many Android devices: heading ≈ 360 - alpha
-      hd = invertEl.checked ? event.alpha : (360 - event.alpha);
-      hd = hd + getScreenAngle();
-    }
-
-    if (hd == null) return;
-
-    hd = norm360(hd);
-    headingDeg = smoothAngle(headingDeg, hd, 0.20);
-    updateUI();
-  }
-
-  async function requestCompass() {
-    const DO = window.DeviceOrientationEvent;
-    if (!DO) {
-      setStatus('компас недоступен: нет DeviceOrientationEvent.');
-      compassOn = false;
-      updateUI();
+  function startGPSWatch() {
+    if (!navigator.geolocation) {
+      setStatus("геолокация недоступна в браузере.");
+      showWarn("Этот браузер не поддерживает геолокацию.");
       return false;
     }
+    hideWarn();
+
+    // watchPosition лучше, чем getCurrentPosition — обновляет точность/координаты
+    watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        userLat = pos.coords.latitude;
+        userLon = pos.coords.longitude;
+        gpsAcc = pos.coords.accuracy;
+        render();
+      },
+      (err) => {
+        setStatus("ошибка GPS: " + (err.message || err.code));
+        showWarn("GPS не дал координаты. Проверь разрешения и включи точную геолокацию.");
+        render();
+      },
+      { enableHighAccuracy: true, timeout: CFG.gpsTimeout, maximumAge: 1500 }
+    );
+    return true;
+  }
+
+  // =========================
+  // Best sensor: AbsoluteOrientationSensor if available
+  // =========================
+  let absSensor = null;
+
+  function quatToHeadingDeg(q) {
+    // q = [x,y,z,w]
+    const x = q[0], y = q[1], z = q[2], w = q[3];
+    // yaw (Z) in radians
+    const siny_cosp = 2 * (w * z + x * y);
+    const cosy_cosp = 1 - 2 * (y * y + z * z);
+    let yaw = Math.atan2(siny_cosp, cosy_cosp); // -pi..pi
+    let heading = norm360(360 - toDeg(yaw)); // convert to compass-like
+    heading = norm360(heading + getScreenAngle());
+    return heading;
+  }
+
+  function stopSensors() {
+    window.removeEventListener("deviceorientationabsolute", onDeviceOrient, true);
+    window.removeEventListener("deviceorientation", onDeviceOrient, true);
+    if (absSensor) {
+      try { absSensor.stop(); } catch {}
+      absSensor = null;
+    }
+    sensorMode = "NONE";
+    headingDeg = null;
+    lastRaw = null;
+    lastEventTs = 0;
+    render();
+  }
+
+  function startAbsoluteSensor() {
+    // Generic Sensor API (не у всех!)
+    if (!("AbsoluteOrientationSensor" in window)) return false;
+
+    try {
+      absSensor = new AbsoluteOrientationSensor({ frequency: 30, referenceFrame: "screen" });
+      absSensor.addEventListener("reading", () => {
+        const q = absSensor.quaternion;
+        if (!q) return;
+        const now = performance.now();
+        if (now - lastEventTs < CFG.minEventMs) return;
+        lastEventTs = now;
+
+        const raw = norm360(quatToHeadingDeg(q));
+
+        // анти-скачок
+        if (lastRaw != null) {
+          const jump = Math.abs(shortestDelta(lastRaw, raw));
+          if (jump > CFG.rejectJumpDeg) return;
+        }
+        lastRaw = raw;
+
+        const limited = clampStep(headingDeg, raw, CFG.maxStepDeg);
+        headingDeg = smoothAngle(headingDeg, limited, CFG.alpha);
+        sensorMode = "ABS_SENSOR";
+        render();
+      });
+
+      absSensor.addEventListener("error", (e) => {
+        // If permissions denied or not allowed
+        setStatus("сенсор ABS недоступен — переключаюсь на ориентацию.");
+        try { absSensor.stop(); } catch {}
+        absSensor = null;
+        startDeviceOrientation();
+      });
+
+      absSensor.start();
+      sensorMode = "ABS_SENSOR";
+      setStatus("сенсоры: ABS (лучший режим).");
+      return true;
+    } catch (e) {
+      absSensor = null;
+      return false;
+    }
+  }
+
+  // =========================
+  // Fallback: DeviceOrientation (most compatible)
+  // =========================
+  function onDeviceOrient(event) {
+    const now = performance.now();
+    if (now - lastEventTs < CFG.minEventMs) return;
+    lastEventTs = now;
+
+    let raw = null;
+
+    // iOS safari gives webkitCompassHeading
+    if (typeof event.webkitCompassHeading === "number") {
+      raw = event.webkitCompassHeading;
+    } else if (typeof event.alpha === "number") {
+      // On Android Chrome: heading is usually 360 - alpha
+      raw = 360 - event.alpha;
+      raw = raw + getScreenAngle();
+    } else {
+      return;
+    }
+
+    raw = norm360(raw);
+
+    // anti-jump (magnetic noise)
+    if (lastRaw != null) {
+      const jump = Math.abs(shortestDelta(lastRaw, raw));
+      if (jump > CFG.rejectJumpDeg) return;
+    }
+    lastRaw = raw;
+
+    const limited = clampStep(headingDeg, raw, CFG.maxStepDeg);
+    headingDeg = smoothAngle(headingDeg, limited, CFG.alpha);
+
+    sensorMode = "DEV_ORIENT";
+    render();
+  }
+
+  async function startDeviceOrientation() {
+    const DO = window.DeviceOrientationEvent;
+    if (!DO) return false;
 
     // iOS permission
-    if (typeof DO.requestPermission === 'function') {
+    if (typeof DO.requestPermission === "function") {
       try {
         const res = await DO.requestPermission();
-        if (res !== 'granted') {
-          setStatus('доступ к компасу не разрешён.');
-          compassOn = false;
-          updateUI();
+        if (res !== "granted") {
+          setStatus("нет доступа к компасу.");
+          showWarn("Нужен доступ к датчикам. Разреши Motion/Orientation и обнови страницу.");
           return false;
         }
       } catch {
-        setStatus('не удалось запросить доступ к компасу.');
-        compassOn = false;
-        updateUI();
+        setStatus("не удалось запросить доступ к компасу.");
         return false;
       }
     }
 
-    // remove previous to avoid duplicates
-    window.removeEventListener('deviceorientationabsolute', onOrientationFixed, true);
-    window.removeEventListener('deviceorientation', onOrientationFixed, true);
+    window.removeEventListener("deviceorientationabsolute", onDeviceOrient, true);
+    window.removeEventListener("deviceorientation", onDeviceOrient, true);
+    window.addEventListener("deviceorientationabsolute", onDeviceOrient, true);
+    window.addEventListener("deviceorientation", onDeviceOrient, true);
 
-    window.addEventListener('deviceorientationabsolute', onOrientationFixed, true);
-    window.addEventListener('deviceorientation', onOrientationFixed, true);
-
-    compassOn = true;
-    setStatus('компас включён.');
-    updateUI();
+    sensorMode = "DEV_ORIENT";
+    setStatus("сенсоры: DeviceOrientation (совместимый режим).");
     return true;
   }
 
-  function stopSensors() {
-    window.removeEventListener('deviceorientationabsolute', onOrientationFixed, true);
-    window.removeEventListener('deviceorientation', onOrientationFixed, true);
-    compassOn = false;
-    headingDeg = null;
-    setStatus('датчики отключены.');
-    updateUI();
+  // =========================
+  // UX actions
+  // =========================
+  function canRunSecure() {
+    // Geolocation + motion usually require HTTPS
+    return location.protocol === "https:" || location.hostname === "localhost";
   }
 
-  // Buttons
-  el('btnAuto').addEventListener('click', async () => {
-    manualBox.style.display = 'none';
-    await getGPS();
-    await requestCompass();
-    updateUI();
-    setStatus('режим Авто активен. Если стрелка “зеркально” — включи инверсию.');
-  });
-
-  el('btnGPS').addEventListener('click', async () => {
-    manualBox.style.display = 'none';
-    stopSensors(); // выключаем компас
-    await getGPS();
-    updateUI();
-    setStatus('режим: только GPS. Стрелка показывает азимут Киблы (без ориентации телефона).');
-  });
-
-  el('btnStop').addEventListener('click', () => {
-    manualBox.style.display = 'none';
-    stopSensors();
-  });
-
-  el('btnManual').addEventListener('click', () => {
-    manualBox.style.display = (manualBox.style.display === 'none') ? 'block' : 'none';
-    setStatus('ручной ввод: введи широту/долготу и нажми "Посчитать".');
-  });
-
-  el('btnUseSaved').addEventListener('click', () => {
-    const slat = storage.get('qibla_lat');
-    const slon = storage.get('qibla_lon');
-    if (slat && slon) {
-      el('lat').value = slat;
-      el('lon').value = slon;
-      setStatus('подставил сохранённые координаты.');
-    } else {
-      setStatus('сохранённых координат нет.');
-    }
-  });
-
-  el('btnCalc').addEventListener('click', () => {
-    const lat = parseFloat(el('lat').value.replace(',', '.'));
-    const lon = parseFloat(el('lon').value.replace(',', '.'));
-    if (!Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) {
-      setStatus('неверные координаты. Пример: 37.9838 и 23.7275');
+  async function startAll() {
+    hideWarn();
+    if (!canRunSecure()) {
+      setStatus("нужен HTTPS.");
+      showWarn("Открой сайт по HTTPS. Иначе GPS/сенсоры могут быть заблокированы.");
       return;
     }
+
+    setStatus("запрашиваю разрешения…");
+
+    // Start GPS watch
+    startGPSWatch();
+
+    // Start sensors: try best first
+    stopSensors();
+    const okAbs = startAbsoluteSensor();
+    if (!okAbs) {
+      const okDO = await startDeviceOrientation();
+      if (!okDO) {
+        sensorMode = "NONE";
+        showWarn("Компас недоступен. Можно использовать ручной режим (координаты).");
+      }
+    }
+
+    setStatus("готово. Держи телефон горизонтально.");
+    render();
+  }
+
+  function stopAll() {
+    stopGPS();
+    stopSensors();
+    setStatus("остановлено.");
+    render();
+  }
+
+  // manual mode
+  function toggleManual() {
+    manualBox.style.display = (manualBox.style.display === "none" || manualBox.style.display === "") ? "grid" : "none";
+    if (manualBox.style.display !== "none") {
+      setStatus("ручной режим: введи широту/долготу или нажми “Взять GPS”.");
+    }
+  }
+
+  function manualCalc() {
+    const latStr = el("lat").value.trim().replace(",", ".");
+    const lonStr = el("lon").value.trim().replace(",", ".");
+    const lat = parseFloat(latStr);
+    const lon = parseFloat(lonStr);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) {
+      showWarn("Неверные координаты. Пример: 37.924785 и 58.365557");
+      return;
+    }
+    hideWarn();
     userLat = lat;
     userLon = lon;
     gpsAcc = null;
-    updateUI();
-    setStatus('Кибла рассчитана по введённым координатам.');
-  });
-
-  invertEl.addEventListener('change', () => {
-    // сразу обновим, чтобы увидеть эффект
-    setStatus('инверсия изменена. Проверь совпадение с Muslim Pro.');
-    updateUI();
-  });
-
-  // Init from storage
-  const slat = storage.get('qibla_lat');
-  const slon = storage.get('qibla_lon');
-  if (slat && slon) {
-    userLat = parseFloat(slat);
-    userLon = parseFloat(slon);
+    render();
+    setStatus("Кибла рассчитана по введённым координатам.");
   }
-  updateUI();
+
+  function manualUseGPS() {
+    hideWarn();
+    startGPSWatch();
+    setStatus("беру координаты через GPS…");
+  }
+
+  // =========================
+  // Bind buttons
+  // =========================
+  el("btnStart").addEventListener("click", startAll);
+  el("btnStop").addEventListener("click", stopAll);
+  el("btnManual").addEventListener("click", toggleManual);
+  el("btnCalc").addEventListener("click", manualCalc);
+  el("btnUseGPS").addEventListener("click", manualUseGPS);
+
+  // =========================
+  // Initial render
+  // =========================
+  setStatus("готово. Нажми “Старт”.");
+  render();
 })();
 </script>
 </body>
