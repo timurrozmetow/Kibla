@@ -281,13 +281,6 @@
           <div class="compass" id="compass">
             <div class="kaabaBadge"><span class="kaabaIcon"></span>Кааба</div>
 
-            <!-- labels -->
-            <div class="label">N</div>
-            <div class="label s">S</div>
-            <div class="label e">E</div>
-            <div class="label w">W</div>
-
-            <!-- ticks -->
             <svg class="ticks" viewBox="0 0 100 100" aria-hidden="true">
               <g opacity="0.55">
                 <!-- 36 small ticks -->
@@ -312,21 +305,9 @@
           <div class="row">
             <button class="primary" id="btnStart">Старт (GPS + компас)</button>
             <button class="ghost" id="btnStop">Стоп</button>
-            <button class="ghost" id="btnManual">Ручной режим</button>
           </div>
 
           <div class="warnBox" id="warnBox"></div>
-
-          <div class="manualBox" id="manualBox">
-            <div class="grid2">
-              <input id="lat" inputmode="decimal" placeholder="Широта (напр. 37.924785)" />
-              <input id="lon" inputmode="decimal" placeholder="Долгота (напр. 58.365557)" />
-            </div>
-            <div class="row">
-              <button class="primary" id="btnCalc">Посчитать</button>
-              <button class="ghost" id="btnUseGPS">Взять GPS</button>
-            </div>
-          </div>
 
           <div class="divider"></div>
 
@@ -375,7 +356,6 @@
   const needleLayer = el('needleLayer');
   const statusEl = el('status');
   const warnBox = el('warnBox');
-  const manualBox = el('manualBox');
 
   const qiblaAzEl = el('qiblaAz');
   const headingEl = el('heading');
@@ -727,7 +707,7 @@
       const okDO = await startDeviceOrientation();
       if (!okDO) {
         sensorMode = "NONE";
-        showWarn("Компас недоступен. Можно использовать ручной режим (координаты).");
+          showWarn("Компас недоступен в этом браузере. Проверь разрешения, HTTPS и попробуй другой браузер (Chrome/Safari).");
       }
     }
 
@@ -742,45 +722,8 @@
     render();
   }
 
-  // manual mode
-  function toggleManual() {
-    manualBox.style.display = (manualBox.style.display === "none" || manualBox.style.display === "") ? "grid" : "none";
-    if (manualBox.style.display !== "none") {
-      setStatus("ручной режим: введи широту/долготу или нажми “Взять GPS”.");
-    }
-  }
-
-  function manualCalc() {
-    const latStr = el("lat").value.trim().replace(",", ".");
-    const lonStr = el("lon").value.trim().replace(",", ".");
-    const lat = parseFloat(latStr);
-    const lon = parseFloat(lonStr);
-    if (!Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) {
-      showWarn("Неверные координаты. Пример: 37.924785 и 58.365557");
-      return;
-    }
-    hideWarn();
-    userLat = lat;
-    userLon = lon;
-    gpsAcc = null;
-    render();
-    setStatus("Кибла рассчитана по введённым координатам.");
-  }
-
-  function manualUseGPS() {
-    hideWarn();
-    startGPSWatch();
-    setStatus("беру координаты через GPS…");
-  }
-
-  // =========================
-  // Bind buttons
-  // =========================
   el("btnStart").addEventListener("click", startAll);
   el("btnStop").addEventListener("click", stopAll);
-  el("btnManual").addEventListener("click", toggleManual);
-  el("btnCalc").addEventListener("click", manualCalc);
-  el("btnUseGPS").addEventListener("click", manualUseGPS);
 
   // =========================
   // Initial render
