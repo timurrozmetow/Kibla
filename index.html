@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Кибла — направление на Каабу</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      display: grid;
+      place-items: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+    .card {
+      width: min(520px, 100%);
+      border: 1px solid rgba(127,127,127,.35);
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    }
+    h1 { font-size: 18px; margin: 0 0 8px; }
+    .muted { opacity: .75; font-size: 13px; line-height: 1.35; }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+    button, input {
+      border-radius: 12px;
+      border: 1px solid rgba(127,127,127,.35);
+      padding: 10px 12px;
+      font-size: 14px;
+      background: transparent;
+      color: inherit;
+    }
+    button { cursor: pointer; }
+    button.primary {
+      border-color: rgba(80,160,255,.7);
+    }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+    .grid2 input { width: 100%; box-sizing: border-box; }
+    .dial {
+      margin: 18px auto 10px;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      border: 1px solid rgba(127,127,127,.35);
+      position: relative;
+      display: grid;
+      place-items: center;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    .n {
+      position: absolute; top: 10px; left: 50%;
+      transform: translateX(-50%);
+      font-weight: 700; font-size: 14px;
+      opacity: .85;
+    }
+    .arrowWrap {
+      width: 180px; height: 180px;
+      display: grid; place-items: center;
+      transform: rotate(0deg);
+      transition: transform .12s linear;
+    }
+    .arrow {
+      width: 0; height: 0;
+      border-left: 16px solid transparent;
+      border-right: 16px solid transparent;
+      border-bottom: 70px solid currentColor;
+      filter: drop-shadow(0 6px 10px rgba(0,0,0,.15));
+    }
+    .info {
+      margin-top: 10px;
+      display: grid;
+      gap: 6px;
+      font-size: 14px;
+    }
+    .kv {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      border-bottom: 1px dashed rgba(127,127,127,.25);
+      padding-bottom: 6px;
+    }
+    .kv b { font-weight: 650; }
+    .status {
+      margin-top: 10px;
+      font-size: 13px;
+      opacity: .8;
+      line-height: 1.35;
+    }
+    .tiny { font-size: 12px; opacity: .7; margin-top: 8px; }
+    .link {
+      text-decoration: underline;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Направление на Каабу (Кибла)</h1>
+    <div class="muted">
+      Работает без карт и библиотек. Для точного режима “Авто” нужны GPS и компас.
+      Если компас недоступен — используй ручной ввод координат.
+    </div>
+
+    <div class="dial" aria-label="Компас">
+      <div class="n">N</div>
+      <div id="arrowWrap" class="arrowWrap" title="Стрелка указывает на Киблу">
+        <div class="arrow"></div>
+      </div>
+    </div>
+
+    <div class="info">
+      <div class="kv"><span>Азимут Киблы</span><b id="qiblaAz">—</b></div>
+      <div class="kv"><span>Твой курс (компас)</span><b id="heading">—</b></div>
+      <div class="kv"><span>Поворот стрелки</span><b id="turn">—</b></div>
+      <div class="kv"><span>Координаты</span><b id="coords">—</b></div>
+    </div>
+
+    <div class="row">
+      <button class="primary" id="btnAuto">Авто: GPS + компас</button>
+      <button id="btnGPS">Только GPS (без компаса)</button>
+      <button id="btnManual">Ручной ввод</button>
+    </div>
+
+    <div id="manualBox" style="display:none; margin-top:12px;">
+      <div class="grid2">
+        <input id="lat" inputmode="decimal" placeholder="Широта (например 37.9838)" />
+        <input id="lon" inputmode="decimal" placeholder="Долгота (например 23.7275)" />
+      </div>
+      <div class="row">
+        <button class="primary" id="btnCalc">Посчитать Киблу</button>
+        <button id="btnUseSaved" title="Если вводил раньше — подставит">Подставить сохранённые</button>
+      </div>
+      <div class="tiny">
+        Подсказка: координаты можно взять из Google Maps (долгое нажатие → копировать координаты).
+      </div>
+    </div>
+
+    <div class="status" id="status">Статус: ждём действия.</div>
+    <div class="tiny">
+      Если компас не работает: открой по HTTPS, отключи VPN/экономию батареи, сделай “калибровку” (покрути телефон восьмёркой).
+    </div>
+  </div>
+
+<script>
+(() => {
+  // Координаты Каабы (Мекка)
+  const KAABA = { lat: 21.422487, lon: 39.826206 };
+
+  const el = (id) => document.getElementById(id);
+  const arrowWrap = el('arrowWrap');
+  const statusEl = el('status');
+  const qiblaAzEl = el('qiblaAz');
+  const headingEl = el('heading');
+  const turnEl = el('turn');
+  const coordsEl = el('coords');
+  const manualBox = el('manualBox');
+
+  let userLat = null, userLon = null;
+  let headingDeg = null; // 0..360 (0=N)
+  let qiblaAz = null;    // 0..360
+
+  // Helpers
+  const toRad = (d) => d * Math.PI / 180;
+  const toDeg = (r) => r * 180 / Math.PI;
+  const norm360 = (d) => ((d % 360) + 360) % 360;
+
+  function setStatus(msg) { statusEl.textContent = 'Статус: ' + msg; }
+
+  function calcQiblaAzimuth(lat, lon) {
+    // Great-circle bearing from (lat,lon) to Kaaba
+    const φ1 = toRad(lat);
+    const φ2 = toRad(KAABA.lat);
+    const Δλ = toRad(KAABA.lon - lon);
+
+    const y = Math.sin(Δλ) * Math.cos(φ2);
+    const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+    const θ = Math.atan2(y, x);
+    return norm360(toDeg(θ));
+  }
+
+  function updateUI() {
+    if (userLat != null && userLon != null) {
+      coordsEl.textContent = `${userLat.toFixed(6)}, ${userLon.toFixed(6)}`;
+      qiblaAz = calcQiblaAzimuth(userLat, userLon);
+      qiblaAzEl.textContent = `${qiblaAz.toFixed(1)}°`;
+      localStorage.setItem('qibla_lat', String(userLat));
+      localStorage.setItem('qibla_lon', String(userLon));
+    } else {
+      coordsEl.textContent = '—';
+      qiblaAzEl.textContent = '—';
+      qiblaAz = null;
+    }
+
+    headingEl.textContent = (headingDeg == null) ? '—' : `${norm360(headingDeg).toFixed(1)}°`;
+
+    if (qiblaAz != null) {
+      // If compass heading available: rotate by (qiblaAz - heading)
+      const rotateDeg = (headingDeg == null) ? qiblaAz : norm360(qiblaAz - headingDeg);
+      arrowWrap.style.transform = `rotate(${rotateDeg}deg)`;
+      turnEl.textContent = `${rotateDeg.toFixed(1)}°`;
+    } else {
+      arrowWrap.style.transform = 'rotate(0deg)';
+      turnEl.textContent = '—';
+    }
+  }
+
+  // GPS
+  async function getGPS() {
+    if (!navigator.geolocation) {
+      setStatus('геолокация недоступна в этом браузере.');
+      return;
+    }
+    setStatus('запрашиваю GPS…');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        userLat = pos.coords.latitude;
+        userLon = pos.coords.longitude;
+        setStatus('GPS получен.');
+        updateUI();
+      },
+      (err) => {
+        setStatus('ошибка GPS: ' + (err.message || err.code));
+      },
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 2000 }
+    );
+  }
+
+  // Compass / device orientation
+  async function requestCompass() {
+    // iOS requires explicit permission
+    const DO = window.DeviceOrientationEvent;
+    if (!DO) {
+      setStatus('компас недоступен: нет DeviceOrientationEvent.');
+      return false;
+    }
+
+    if (typeof DO.requestPermission === 'function') {
+      try {
+        const res = await DO.requestPermission();
+        if (res !== 'granted') {
+          setStatus('доступ к компасу не разрешён.');
+          return false;
+        }
+      } catch (e) {
+        setStatus('не удалось запросить доступ к компасу.');
+        return false;
+      }
+    }
+
+    window.addEventListener('deviceorientation', onOrientation, true);
+    setStatus('компас включён.');
+    return true;
+  }
+
+  function onOrientation(event) {
+    // iOS: webkitCompassHeading (0..360, 0=N)
+    if (typeof event.webkitCompassHeading === 'number') {
+      headingDeg = event.webkitCompassHeading;
+      updateUI();
+      return;
+    }
+
+    // Other browsers: alpha is 0..360, but reference frame varies; try best-effort.
+    if (typeof event.alpha === 'number') {
+      // event.absolute sometimes indicates it's relative to Earth frame
+      // We'll treat it as compass-like heading.
+      headingDeg = event.alpha;
+      updateUI();
+    }
+  }
+
+  // Buttons
+  el('btnAuto').addEventListener('click', async () => {
+    manualBox.style.display = 'none';
+    await getGPS();
+    await requestCompass();
+    updateUI();
+    setStatus('режим Авто активен (если компас поддерживается).');
+  });
+
+  el('btnGPS').addEventListener('click', async () => {
+    manualBox.style.display = 'none';
+    headingDeg = null;
+    await getGPS();
+    updateUI();
+    setStatus('режим: только GPS (стрелка показывает азимут, но без ориентации телефона).');
+  });
+
+  el('btnManual').addEventListener('click', () => {
+    manualBox.style.display = (manualBox.style.display === 'none') ? 'block' : 'none';
+    setStatus('ручной ввод: введи широту/долготу и нажми "Посчитать".');
+  });
+
+  el('btnUseSaved').addEventListener('click', () => {
+    const slat = localStorage.getItem('qibla_lat');
+    const slon = localStorage.getItem('qibla_lon');
+    if (slat && slon) {
+      el('lat').value = slat;
+      el('lon').value = slon;
+      setStatus('подставил сохранённые координаты.');
+    } else {
+      setStatus('сохранённых координат нет.');
+    }
+  });
+
+  el('btnCalc').addEventListener('click', () => {
+    const lat = parseFloat(el('lat').value.replace(',', '.'));
+    const lon = parseFloat(el('lon').value.replace(',', '.'));
+    if (!Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) {
+      setStatus('неверные координаты. Пример: 37.9838 и 23.7275');
+      return;
+    }
+    userLat = lat;
+    userLon = lon;
+    updateUI();
+    setStatus('Кибла рассчитана по введённым координатам.');
+  });
+
+  // Initial: try to show something useful from saved coordinates
+  const slat = localStorage.getItem('qibla_lat');
+  const slon = localStorage.getItem('qibla_lon');
+  if (slat && slon) {
+    userLat = parseFloat(slat);
+    userLon = parseFloat(slon);
+    updateUI();
+    setStatus('загружены сохранённые координаты. Можешь включить Авто для компаса.');
+  } else {
+    updateUI();
+  }
+})();
+</script>
+</body>
+</html>
